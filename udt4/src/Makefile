@@ -34,11 +34,7 @@ ifeq ($(arch), amd64)
    CCFLAGS += -DAMD64
 endif
 
-ifeq ($(arch), ARM)
-   CCFLAGS += -DARM
-endif
-
-OBJS = api.o buffer.o cache.o ccc.o channel.o common.o core.o epoll.o list.o md5.o packet.o queue.o window.o udt_wrap.o
+OBJS = api.o buffer.o cache.o ccc.o channel.o common.o core.o epoll.o list.o md5.o packet.o queue.o window.o
 DIR = $(shell pwd)
 
 all: libudt.so libudt.a udt
@@ -47,10 +43,10 @@ all: libudt.so libudt.a udt
 	$(C++) $(CCFLAGS) $< -c
 
 libudt.so: $(OBJS)
-ifneq ($(os), Darwin)
-	$(C++) -pthread -shared -o $@ $^
+ifneq ($(os), OSX)
+	$(C++) -shared -o $@ $^
 else
-	$(C++) -dynamiclib -o libudt.dylib -lstdc++ -lpthread -lm $^ -undefined suppress -flat_namespace
+	$(C++) -dynamiclib -o libudt.dylib -lstdc++ -lpthread -lm $^
 endif
 
 libudt.a: $(OBJS)
@@ -60,7 +56,7 @@ udt:
 	cp udt.h udt
 
 clean:
-	rm -f *.o *.so *.dylib *.a *.cxx *_gc.c udt
+	rm -f *.o *.so *.dylib *.a udt
 
 install:
 	export LD_LIBRARY_PATH=$(DIR):$$LD_LIBRARY_PATH
