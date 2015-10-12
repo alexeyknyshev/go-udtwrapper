@@ -17,10 +17,10 @@ func (d *Dialer) DialUDT(network string, raddr *UDTAddr) (*UDTConn, error) {
 	switch network {
 	case "udt", "udt4", "udt6":
 	default:
-		return nil, &net.OpError{Op: "dial", Net: network, Addr: raddr, Err: net.UnknownNetworkError(network)}
+		return nil, &net.OpError{Op: "dial", Net: network, Addr: raddr, Source: nil, Err: net.UnknownNetworkError(network)}
 	}
 	if raddr == nil {
-		return nil, &net.OpError{Op: "dial", Net: network, Addr: nil, Err: errMissingAddress}
+		return nil, &net.OpError{Op: "dial", Net: network, Addr: nil, Source: nil, Err: errMissingAddress}
 	}
 
 	laddr, ok := d.LocalAddr.(*UDTAddr)
