@@ -3,7 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
-	udt "github.com/Syncbak-Git/udtwrapper"
+	udt "github.com/Lupus/go-udtwrapper"
 	"io"
 	"io/ioutil"
 	"net"
