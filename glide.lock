@@ -1,0 +1,8 @@
+hash: 03b7d893d415975f090c24158d44785733b35ff7a58570c0303d8ad56d55aab3
+updated: 2016-07-03T13:06:19.883981325+03:00
+imports:
+- name: github.com/jbenet/go-sockaddr
+  version: 2e7ea655c10e4d4d73365f0f073b81b39cb08ee1
+  subpackages:
+  - net
+devImports: []

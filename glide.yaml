@@ -1,0 +1,5 @@
+package: github.com/Lupus/go-udtwrapper
+import:
+- package: github.com/jbenet/go-sockaddr
+  subpackages:
+  - net
