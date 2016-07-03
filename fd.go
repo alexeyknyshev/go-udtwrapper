@@ -228,6 +228,28 @@ func (fd *udtFD) SetWriteDeadline(t time.Time) error {
 	return nil
 }
 
+func (fd *udtFD) SetRendezvous(value bool) error {
+	return fd.setBoolOpt(C.UDT_RENDEZVOUS, value)
+}
+
+func (fd *udtFD) setBoolOpt(option int, value bool) error {
+	var b C.int
+	if value {
+		b = 1
+	} else {
+		b = 0
+	}
+	return fd.setSockOpt(option, unsafe.Pointer(&b), int(unsafe.Sizeof(b)))
+}
+
+func (fd *udtFD) setSockOpt(option int, optval unsafe.Pointer, optlen int) error {
+	n := int(C.udt_setsockopt(fd.sock, 0, C.SOCKOPT(option), optval, (C.int)(optlen)))
+	if n == C.UDT_SUCCESS {
+		return nil
+	}
+	return lastError()
+}
+
 // lastError returns the last error as a Go string.
 func lastError() error {
 	return errors.New(C.GoString(C.udt_getlasterror_desc()))
@@ -251,7 +273,7 @@ func closeSocket(sock C.UDTSOCKET) error {
 }
 
 // dialFD sets up a udtFD
-func dialFD(laddr, raddr *UDTAddr) (*udtFD, error) {
+func dialFD(laddr, raddr *UDTAddr, rendezvous bool) (*udtFD, error) {
 
 	if raddr == nil {
 		return nil, &net.OpError{"dial", "udt", laddr, raddr, errors.New("invalid remote address")}
@@ -270,6 +292,10 @@ func dialFD(laddr, raddr *UDTAddr) (*udtFD, error) {
 	if err != nil {
 		closeSocket(sock)
 		return nil, err
+	}
+
+	if rendezvous {
+		fd.SetRendezvous(true)
 	}
 
 	if laddr != nil {

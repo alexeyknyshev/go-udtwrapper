@@ -14,8 +14,12 @@ var errMissingAddress = errors.New("missing address")
 // DialUDT connects to the remote address raddr on the network net,
 // which must be "udt", "udt4", or "udt6".
 func (d *Dialer) DialUDT(network string, raddr *UDTAddr) (*UDTConn, error) {
+	var rendezvous bool
 	switch network {
 	case "udt", "udt4", "udt6":
+		rendezvous = false
+	case "udtz", "udt4z", "udt6z":
+		rendezvous = true
 	default:
 		return nil, &net.OpError{Op: "dial", Net: network, Addr: raddr, Source: nil, Err: net.UnknownNetworkError(network)}
 	}
@@ -28,7 +32,7 @@ func (d *Dialer) DialUDT(network string, raddr *UDTAddr) (*UDTConn, error) {
 		laddr = nil
 	}
 
-	return dialConn(laddr, raddr)
+	return dialConn(laddr, raddr, rendezvous)
 }
 
 // Dial connects to the remote address raddr on the network net,

@@ -18,8 +18,8 @@ func newUDTConn(fd *udtFD, net string) *UDTConn {
 	return &UDTConn{udtFD: fd, net: net}
 }
 
-func dialConn(laddr, raddr *UDTAddr) (*UDTConn, error) {
-	fd, err := dialFD(laddr, raddr)
+func dialConn(laddr, raddr *UDTAddr, rendezvous bool) (*UDTConn, error) {
+	fd, err := dialFD(laddr, raddr, rendezvous)
 	if err != nil {
 		return nil, err
 	}

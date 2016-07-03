@@ -65,6 +65,13 @@ func udt2udp(n string) (string, error) {
 		return "udp4", nil
 	case "udt6":
 		return "udp6", nil
+	case "udtz":
+		return "udp", nil
+	case "udt4z":
+		return "udp4", nil
+	case "udt6z":
+		return "udp6", nil
+
 	default:
 		return "", net.UnknownNetworkError(n)
 	}
