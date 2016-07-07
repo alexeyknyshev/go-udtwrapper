@@ -272,6 +272,100 @@ func closeSocket(sock C.UDTSOCKET) error {
 	return nil
 }
 
+type PerfMonData struct {
+	// global measurements
+	MsTimeStamp        int64 // time since the UDT entity is started, in milliseconds
+	PktSentTotal       int64 // total number of sent data packets, including retransmissions
+	PktRecvTotal       int64 // total number of received packets
+	PktSndLossTotal    int   // total number of lost packets (sender side)
+	PktRcvLossTotal    int   // total number of lost packets (receiver side)
+	PktRetransTotal    int   // total number of retransmitted packets
+	PktSentACKTotal    int   // total number of sent ACK packets
+	PktRecvACKTotal    int   // total number of received ACK packets
+	PktSentNAKTotal    int   // total number of sent NAK packets
+	PktRecvNAKTotal    int   // total number of received NAK packets
+	UsSndDurationTotal int64 // total time duration when UDT is sending data (idle time exclusive)
+
+	// local measurements
+	PktSent       int64   // number of sent data packets, including retransmissions
+	PktRecv       int64   // number of received packets
+	PktSndLoss    int     // number of lost packets (sender side)
+	PktRcvLoss    int     // number of lost packets (receiver side)
+	PktRetrans    int     // number of retransmitted packets
+	PktSentACK    int     // number of sent ACK packets
+	PktRecvACK    int     // number of received ACK packets
+	PktSentNAK    int     // number of sent NAK packets
+	PktRecvNAK    int     // number of received NAK packets
+	MbpsSendRate  float64 // sending rate in Mb/s
+	MbpsRecvRate  float64 // receiving rate in Mb/s
+	UsSndDuration int64   // busy sending time (i.e., idle time exclusive)
+
+	// instant measurements
+	UsPktSndPeriod      float64 // packet sending period, in microseconds
+	PktFlowWindow       int     // flow window size, in number of packets
+	PktCongestionWindow int     // congestion window size, in number of packets
+	PktFlightSize       int     // number of packets on flight
+	MsRTT               float64 // RTT, in milliseconds
+	MbpsBandwidth       float64 // estimated bandwidth, in Mb/s
+	ByteAvailSndBuf     int     // available UDT sender buffer size
+	ByteAvailRcvBuf     int     // available UDT receiver buffer size
+}
+
+func makePerfMonData(traceinfo *C.TRACEINFO) *PerfMonData {
+	return &PerfMonData{
+		// global measurements
+		MsTimeStamp:        int64(traceinfo.msTimeStamp),
+		PktSentTotal:       int64(traceinfo.pktSentTotal),
+		PktRecvTotal:       int64(traceinfo.pktRecvTotal),
+		PktSndLossTotal:    int(traceinfo.pktSndLossTotal),
+		PktRcvLossTotal:    int(traceinfo.pktRcvLossTotal),
+		PktRetransTotal:    int(traceinfo.pktRetransTotal),
+		PktSentACKTotal:    int(traceinfo.pktSentACKTotal),
+		PktRecvACKTotal:    int(traceinfo.pktRecvACKTotal),
+		PktSentNAKTotal:    int(traceinfo.pktSentNAKTotal),
+		PktRecvNAKTotal:    int(traceinfo.pktRecvNAKTotal),
+		UsSndDurationTotal: int64(traceinfo.usSndDurationTotal),
+
+		// local measurements
+		PktSent:       int64(traceinfo.pktSent),
+		PktRecv:       int64(traceinfo.pktRecv),
+		PktSndLoss:    int(traceinfo.pktSndLoss),
+		PktRcvLoss:    int(traceinfo.pktRcvLoss),
+		PktRetrans:    int(traceinfo.pktRetrans),
+		PktSentACK:    int(traceinfo.pktSentACK),
+		PktRecvACK:    int(traceinfo.pktRecvACK),
+		PktSentNAK:    int(traceinfo.pktSentNAK),
+		PktRecvNAK:    int(traceinfo.pktRecvNAK),
+		MbpsSendRate:  float64(traceinfo.mbpsSendRate),
+		MbpsRecvRate:  float64(traceinfo.mbpsRecvRate),
+		UsSndDuration: int64(traceinfo.usSndDuration),
+
+		// instant measurements
+		UsPktSndPeriod:      float64(traceinfo.usPktSndPeriod),
+		PktFlowWindow:       int(traceinfo.pktFlowWindow),
+		PktCongestionWindow: int(traceinfo.pktCongestionWindow),
+		PktFlightSize:       int(traceinfo.pktFlightSize),
+		MsRTT:               float64(traceinfo.msRTT),
+		MbpsBandwidth:       float64(traceinfo.mbpsBandwidth),
+		ByteAvailSndBuf:     int(traceinfo.byteAvailSndBuf),
+		ByteAvailRcvBuf:     int(traceinfo.byteAvailRcvBuf),
+	}
+}
+
+func (fd *udtFD) PerfMon(clear bool) (*PerfMonData, error) {
+	var traceinfo C.TRACEINFO
+	var c int
+	if clear {
+		c = 1
+	} else {
+		c = 0
+	}
+	if C.udt_perfmon(fd.sock, &traceinfo, C.int(c)) == C.ERROR {
+		return nil, lastError()
+	}
+	return makePerfMonData(&traceinfo), nil
+}
+
 // dialFD sets up a udtFD
 func dialFD(laddr, raddr *UDTAddr, rendezvous bool) (*udtFD, error) {
 
