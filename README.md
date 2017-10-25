@@ -25,3 +25,14 @@ commits were modified due to rebase and some commits were omitted.
 ```sh
 (cd udtcat; go build; ./test_simple.sh)
 ```
+
+
+### Supported Platforms
+
+| ARCH/OS      |  Linux  | Mac OSX | Windows  |
+|--------------|---------|---------|----------|
+| x86/i386     |    ?    |    ?    |    ?     |
+| x86-64/amd64 |   YES   |    ?    |   YES*   |
+
+*Golang doesn't support SEH exception handling(https://github.com/golang/go/issues/12516).
+Use mingw-w64 with sjlj handling and without pthread wrapper under windows.
