@@ -13,7 +13,7 @@
    #include <windows.h>
 #endif
 
-  #ifdef WIN32
+#ifdef WIN32
    #ifndef __MINGW__
       // Explicitly define 32-bit and 64-bit numbers
       typedef __int32 int32_t;

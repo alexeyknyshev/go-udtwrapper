@@ -32,8 +32,8 @@ var Usage = func() {
 
 Usage:
 
-  listen: %s [<local address>] <remote address>
-  dial:   %s -l <local address>
+  dial: %s [<local address>] <remote address>
+  listen:   %s -l <local address>
 
 Address format is Go's: [host]:port
 `
