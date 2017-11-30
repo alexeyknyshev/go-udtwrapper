@@ -15,8 +15,12 @@ type UDTListener struct {
 }
 
 func (l *UDTListener) Accept() (c net.Conn, err error) {
+
+	logf("Accept UDTListener")
+	defer logf("UDTListener is accepted")
 	cfd, err := l.fd.accept()
 	if err != nil {
+		logf("Accept err: ", err)
 		return nil, err
 	}
 
@@ -27,7 +31,13 @@ func (l *UDTListener) Accept() (c net.Conn, err error) {
 }
 
 func (l *UDTListener) Close() error {
-	return l.fd.Close()
+	logf("Close UDTListener")
+	defer logf("UDTListener is closed")
+	err := l.fd.Close()
+	if err != nil {
+		logf("Failed to close UDTListener: ", err)
+	}
+	return err
 }
 
 func (l *UDTListener) Addr() net.Addr {
@@ -42,6 +52,8 @@ func (l *UDTListener) Addr() net.Addr {
 // methods can be used to receive and send UDT packets with per-packet
 // addressing.
 func ListenUDT(network string, laddr *UDTAddr) (*UDTListener, error) {
+	logf("ListenUDT")
+	defer logf("defer ListenUDT")
 	switch network {
 	case "udt", "udt4", "udt6":
 	default:
@@ -53,6 +65,7 @@ func ListenUDT(network string, laddr *UDTAddr) (*UDTListener, error) {
 
 	fdl, err := listenFD(laddr)
 	if err != nil {
+		logf("Failed to Listen udt: ", err)
 		return nil, err
 	}
 	return &UDTListener{fd: fdl}, nil

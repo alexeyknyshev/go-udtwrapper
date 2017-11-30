@@ -48,6 +48,7 @@ written by
    #include <unistd.h>
 #endif
 #include <cstring>
+#include <cstdio>
 #include "api.h"
 #include "core.h"
 
@@ -618,38 +619,50 @@ int CUDTUnited::listen(const UDTSOCKET u, int backlog)
 
 UDTSOCKET CUDTUnited::accept(const UDTSOCKET listen, sockaddr* addr, int* addrlen)
 {
+   printf("1");
    if ((NULL != addr) && (NULL == addrlen))
       throw CUDTException(5, 3, 0);
 
+   printf("2");
    CUDTSocket* ls = locate(listen);
 
+   printf("3");
    if (ls == NULL)
       throw CUDTException(5, 4, 0);
 
+   printf("4");
    // the "listen" socket must be in LISTENING status
    if (LISTENING != ls->m_Status)
       throw CUDTException(5, 6, 0);
 
+   printf("5");
    // no "accept" in rendezvous connection setup
    if (ls->m_pUDT->m_bRendezvous)
       throw CUDTException(5, 7, 0);
 
+   printf("6");
    UDTSOCKET u = CUDT::INVALID_SOCK;
    bool accepted = false;
 
+   printf("7");
    // !!only one conection can be set up each time!!
    #ifndef WIN32
+
+      printf("while !accepted\n");
       while (!accepted)
       {
+         printf("mutex_lock\n");
          pthread_mutex_lock(&(ls->m_AcceptLock));
-
+         printf("8\n");
          if ((LISTENING != ls->m_Status) || ls->m_pUDT->m_bBroken)
          {
+            printf("inside if condition 9\n");
             // This socket has been closed.
             accepted = true;
          }
          else if (ls->m_pQueuedSockets->size() > 0)
          {
+            printf("inside else condition 10\n");
             u = *(ls->m_pQueuedSockets->begin());
             ls->m_pAcceptSockets->insert(ls->m_pAcceptSockets->end(), u);
             ls->m_pQueuedSockets->erase(ls->m_pQueuedSockets->begin());
@@ -657,15 +670,21 @@ UDTSOCKET CUDTUnited::accept(const UDTSOCKET listen, sockaddr* addr, int* addrle
          }
          else if (!ls->m_pUDT->m_bSynRecving)
          {
+
+            printf("inside else condition 11\n");
             accepted = true;
          }
 
-         if (!accepted && (LISTENING == ls->m_Status))
+         printf("12\n");
+         if (!accepted && (LISTENING == ls->m_Status)) {
+            printf("13\n");
             pthread_cond_wait(&(ls->m_AcceptCond), &(ls->m_AcceptLock));
-
-         if (ls->m_pQueuedSockets->empty())
+         }
+         if (ls->m_pQueuedSockets->empty()) {
+            printf("14\n");
             m_EPoll.update_events(listen, ls->m_pUDT->m_sPollID, UDT_EPOLL_IN, false);
-
+         }
+         printf("15\n");
          pthread_mutex_unlock(&(ls->m_AcceptLock));
       }
    #else
@@ -700,24 +719,27 @@ UDTSOCKET CUDTUnited::accept(const UDTSOCKET listen, sockaddr* addr, int* addrle
             m_EPoll.update_events(listen, ls->m_pUDT->m_sPollID, UDT_EPOLL_IN, false);
       }
    #endif
-
+   printf(" 16\n");
    if (u == CUDT::INVALID_SOCK)
    {
+
+      printf("inside if 17\n");
       // non-blocking receiving, no connection available
       if (!ls->m_pUDT->m_bSynRecving)
          throw CUDTException(6, 2, 0);
-
+      printf("inside if 18\n");
       // listening socket is closed
       throw CUDTException(5, 6, 0);
    }
-
+   printf(" 19\n");
    if ((addr != NULL) && (addrlen != NULL))
    {
+      printf(" 20\n");
       if (AF_INET == locate(u)->m_iIPversion)
          *addrlen = sizeof(sockaddr_in);
       else
          *addrlen = sizeof(sockaddr_in6);
-
+      printf(" 21\n");
       // copy address information of peer node
       memcpy(addr, locate(u)->m_pPeerAddr, *addrlen);
    }
@@ -1771,6 +1793,9 @@ int CUDT::getsockopt(UDTSOCKET u, int, UDTOpt optname, void* optval, int* optlen
 
 int CUDT::setsockopt(UDTSOCKET u, int, UDTOpt optname, const void* optval, int optlen)
 {
+   if (optname == UDT_RCVTIMEO) {
+      printf("optval equal %d", *(int*)optval);
+   }
    try
    {
       CUDT* udt = s_UDTUnited.lookup(u);

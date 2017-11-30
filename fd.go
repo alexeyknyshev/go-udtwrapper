@@ -16,7 +16,7 @@ import (
 // #cgo windows LDFLAGS: -static-libgcc -static-libstdc++ -static -lkernel32 -luser32 -lws2_32
 // #cgo i386 CFLAGS: -DIA32
 // #cgo amd64 CFLAGS: -DAMD64
-// #cgo CFLAGS: -Wall -finline-functions -O3 -fno-strict-aliasing -fvisibility=hidden
+// #cgo CFLAGS: -g -Wall -finline-functions -O3 -fno-strict-aliasing -fvisibility=hidden
 // #cgo LDFLAGS: -lstdc++ -lm
 // #include "udt_c.h"
 // #include <errno.h>
@@ -128,8 +128,9 @@ func (fd *udtFD) listen(backlog int) error {
 func (fd *udtFD) accept() (*udtFD, error) {
 	var sa syscall.RawSockaddrAny
 	var salen C.int
-
+	fmt.Println("fd.accept before C.udt_accept")
 	sock2 := C.udt_accept(fd.sock, (*C.struct_sockaddr)(unsafe.Pointer(&sa)), &salen)
+	fmt.Println("fd.accept after C.udt_accept")
 	if sock2 == (C.UDTSOCKET)(C.INVALID_SOCK) {
 		err := fd.lastErrorOp("accept")
 		return nil, err
@@ -182,6 +183,8 @@ func (fd *udtFD) connect(raddr *UDTAddr) error {
 }
 
 func (fd *udtFD) Close() error {
+	logf("Close udtFD")
+	defer logf("udtFD closed")
 	err := closeSocket(fd.sock)
 	fd.sock = -1
 	if err != nil {
@@ -213,10 +216,12 @@ func (fd *udtFD) SetDeadline(t time.Time) error {
 }
 
 func (fd *udtFD) SetReadDeadline(t time.Time) error {
+	logf("start SetReadDeadline")
 	d := C.int(t.Sub(time.Now()).Nanoseconds() / 1e6)
 	if C.udt_setsockopt(fd.sock, 0, C.UDT_RCVTIMEO, unsafe.Pointer(&d), C.sizeof_int) != 0 {
 		return fmt.Errorf("failed to set ReadDeadline: %s", lastError())
 	}
+	logf("finish SetReadDeadline")
 	return nil
 }
 

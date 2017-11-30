@@ -56,6 +56,7 @@ written by
 #include <sstream>
 #include "queue.h"
 #include "core.h"
+#include <cstdio>
 
 using namespace std;
 
@@ -225,7 +226,6 @@ void CUDT::setOpt(UDTOpt optName, const void* optval, int)
          throw CUDTException(5, 3, 0);
 
       m_iMSS = *(int*)optval;
-
       // Packet size cannot be greater than UDP buffer size
       if (m_iMSS > m_iUDPSndBufSize)
          m_iMSS = m_iUDPSndBufSize;
@@ -1012,41 +1012,49 @@ void CUDT::close()
 
 int CUDT::send(const char* data, int len)
 {
+   printf("Start send\n");
    if (UDT_DGRAM == m_iSockType)
       throw CUDTException(5, 10, 0);
-
+   printf("send 1\n");
    // throw an exception if not connected
    if (m_bBroken || m_bClosing)
       throw CUDTException(2, 1, 0);
    else if (!m_bConnected)
       throw CUDTException(2, 2, 0);
-
+   printf("send 2\n");
    if (len <= 0)
       return 0;
-
+   printf("send 3\n");
    CGuard sendguard(m_SendLock);
-
+   printf("send 4\n");
    if (m_pSndBuffer->getCurrBufSize() == 0)
    {
+      printf("send 5\n");
       // delay the EXP timer to avoid mis-fired timeout
       uint64_t currtime;
       CTimer::rdtsc(currtime);
       m_ullLastRspTime = currtime;
    }
-
+   printf("send 6\n");
    if (m_iSndBufSize <= m_pSndBuffer->getCurrBufSize())
    {
+      printf("send 7\n");
       if (!m_bSynSending)
          throw CUDTException(6, 1, 0);
       else
       {
          // wait here during a blocking sending
          #ifndef WIN32
+            printf("send 8 m_SendBlockLock\n");
             pthread_mutex_lock(&m_SendBlockLock);
+            printf("send 9\n");
             if (m_iSndTimeOut < 0) 
-            { 
+            {
+               printf("send 10\n");
                while (!m_bBroken && m_bConnected && !m_bClosing && (m_iSndBufSize <= m_pSndBuffer->getCurrBufSize()) && m_bPeerHealth)
+                  printf("send 11\n");
                   pthread_cond_wait(&m_SendBlockCond, &m_SendBlockLock);
+                  printf("send 12\n");
             }
             else
             {
@@ -1057,9 +1065,13 @@ int CUDT::send(const char* data, int len)
                locktime.tv_nsec = (exptime % 1000000) * 1000;
 
                while (!m_bBroken && m_bConnected && !m_bClosing && (m_iSndBufSize <= m_pSndBuffer->getCurrBufSize()) && m_bPeerHealth && (CTimer::getTime() < exptime))
+                  printf("send 13\n");
                   pthread_cond_timedwait(&m_SendBlockCond, &m_SendBlockLock, &locktime);
+                  printf("send 14\n");
             }
+            printf("send 15\n");
             pthread_mutex_unlock(&m_SendBlockLock);
+            printf("send 16\n");
          #else
             if (m_iSndTimeOut < 0)
             {
@@ -1121,32 +1133,45 @@ int CUDT::send(const char* data, int len)
 
 int CUDT::recv(char* data, int len)
 {
+   printf("Start recv\n");
    if (UDT_DGRAM == m_iSockType)
       throw CUDTException(5, 10, 0);
 
+   printf("recv 1\n");
    // throw an exception if not connected
    if (!m_bConnected)
       throw CUDTException(2, 2, 0);
    else if ((m_bBroken || m_bClosing) && (0 == m_pRcvBuffer->getRcvDataSize()))
       throw CUDTException(2, 1, 0);
-
+   printf("recv 2\n");
    if (len <= 0)
       return 0;
-
+   printf("recv 3\n");
    CGuard recvguard(m_RecvLock);
-
+   printf("recv 4\n");
    if (0 == m_pRcvBuffer->getRcvDataSize())
    {
+      printf("recv 5\n");
       if (!m_bSynRecving)
          throw CUDTException(6, 2, 0);
       else
       {
+         printf("recv 6\n");
          #ifndef WIN32
+            printf("recv 7 lock >>>\n");
             pthread_mutex_lock(&m_RecvDataLock);
+            printf("recv 8 lock <<<\n");
             if (m_iRcvTimeOut < 0) 
-            { 
-               while (!m_bBroken && m_bConnected && !m_bClosing && (0 == m_pRcvBuffer->getRcvDataSize()))
+            {
+               printf("recv 8 if condition\n");
+               while (!m_bBroken && m_bConnected && !m_bClosing && (0 == m_pRcvBuffer->getRcvDataSize())) {
+                  printf("recv 8 pthread_cond_wait: broken = %d, connected = %d, closing = %d, dataSize = %d\n",
+                         (int)m_bBroken, (int)m_bConnected, (int)m_bClosing,  m_pRcvBuffer->getRcvDataSize());
+                  printf("recv 8 cond_wait >>>\n");
                   pthread_cond_wait(&m_RecvDataCond, &m_RecvDataLock);
+                  printf("recv 8 cond_wait <<<\n");
+                  printf("recv 8 if after cond_wait\n");
+               }
             }
             else
             {
@@ -1158,12 +1183,15 @@ int CUDT::recv(char* data, int len)
 
                while (!m_bBroken && m_bConnected && !m_bClosing && (0 == m_pRcvBuffer->getRcvDataSize()))
                {
-                  pthread_cond_timedwait(&m_RecvDataCond, &m_RecvDataLock, &locktime); 
+                  printf("recv 8.5 cond_timedwait >>>\n");
+                  pthread_cond_timedwait(&m_RecvDataCond, &m_RecvDataLock, &locktime);
+                  printf("recv 8.5 cond_timedwait <<<\n");
                   if (CTimer::getTime() >= exptime)
                      break;
                }
             }
             pthread_mutex_unlock(&m_RecvDataLock);
+            printf("recv 10 unlocked\n");
          #else
             if (m_iRcvTimeOut < 0)
             {
@@ -1354,12 +1382,18 @@ int CUDT::recvmsg(char* data, int len)
    do
    {
       #ifndef WIN32
+         printf("recvmsg want to lock >>>\n");
          pthread_mutex_lock(&m_RecvDataLock);
-
+         printf("recvmsg has lock <<<\n");
          if (m_iRcvTimeOut < 0)
          {
-            while (!m_bBroken && m_bConnected && !m_bClosing && (0 == (res = m_pRcvBuffer->readMsg(data, len))))
+
+            printf("recvmsg pthread_cond_wait\n");
+            while (!m_bBroken && m_bConnected && !m_bClosing && (0 == (res = m_pRcvBuffer->readMsg(data, len)))) {
+               printf("recvmsg cond_wait >>>\n");
                pthread_cond_wait(&m_RecvDataCond, &m_RecvDataLock);
+               printf("recvmsg cond_wait <<<\n");
+            }
          }
          else
          {
@@ -1368,13 +1402,15 @@ int CUDT::recvmsg(char* data, int len)
 
             locktime.tv_sec = exptime / 1000000;
             locktime.tv_nsec = (exptime % 1000000) * 1000;
-
+            printf("recvmsg pthread_cond_timedwait >>>\n");
             if (pthread_cond_timedwait(&m_RecvDataCond, &m_RecvDataLock, &locktime) == ETIMEDOUT)
                timeout = true;
+            printf("recvmsg pthread_cond_timedwait <<< timeout = %d\n", (int)timeout);
 
             res = m_pRcvBuffer->readMsg(data, len);           
          }
          pthread_mutex_unlock(&m_RecvDataLock);
+         printf("recvmsg has unlocked unlock\n");
       #else
          if (m_iRcvTimeOut < 0)
          {
@@ -1543,10 +1579,15 @@ int64_t CUDT::recvfile(fstream& ofs, int64_t& offset, int64_t size, int block)
       }
 
       #ifndef WIN32
+
+         printf("recvfile want to lock >>>\n");
          pthread_mutex_lock(&m_RecvDataLock);
+         printf("recvfile has locked <<<\n");
          while (!m_bBroken && m_bConnected && !m_bClosing && (0 == m_pRcvBuffer->getRcvDataSize()))
             pthread_cond_wait(&m_RecvDataCond, &m_RecvDataLock);
+
          pthread_mutex_unlock(&m_RecvDataLock);
+         printf("recvfile has unlocked RecvData mutex\n");
       #else
          while (!m_bBroken && m_bConnected && !m_bClosing && (0 == m_pRcvBuffer->getRcvDataSize()))
             WaitForSingleObject(m_RecvDataCond, INFINITE);
@@ -1567,6 +1608,7 @@ int64_t CUDT::recvfile(fstream& ofs, int64_t& offset, int64_t size, int block)
       }
    }
 
+   CGuard g(m_RecvDataLock);
    if (m_pRcvBuffer->getRcvDataSize() <= 0)
    {
       // read is not available any more
@@ -1666,8 +1708,10 @@ void CUDT::initSynch()
    #ifndef WIN32
       pthread_mutex_init(&m_SendBlockLock, NULL);
       pthread_cond_init(&m_SendBlockCond, NULL);
+      printf("initSynch want to init RecvData mutex\n");
       pthread_mutex_init(&m_RecvDataLock, NULL);
       pthread_cond_init(&m_RecvDataCond, NULL);
+      printf("initSynch have inited RecvData mutex\n");
       pthread_mutex_init(&m_SendLock, NULL);
       pthread_mutex_init(&m_RecvLock, NULL);
       pthread_mutex_init(&m_AckLock, NULL);
@@ -1689,8 +1733,11 @@ void CUDT::destroySynch()
    #ifndef WIN32
       pthread_mutex_destroy(&m_SendBlockLock);
       pthread_cond_destroy(&m_SendBlockCond);
+
+      printf("destroySynch want to destoy RecvData mutex\n");
       pthread_mutex_destroy(&m_RecvDataLock);
       pthread_cond_destroy(&m_RecvDataCond);
+      printf("destroySynch have destoyed RecvData mutex\n");
       pthread_mutex_destroy(&m_SendLock);
       pthread_mutex_destroy(&m_RecvLock);
       pthread_mutex_destroy(&m_AckLock);
@@ -1718,10 +1765,13 @@ void CUDT::releaseSynch()
       pthread_mutex_lock(&m_SendLock);
       pthread_mutex_unlock(&m_SendLock);
 
+      printf("releaseSynch want to lock >>>\n");
       pthread_mutex_lock(&m_RecvDataLock);
+      printf("releaseSynch have locked <<<\n");
       pthread_cond_signal(&m_RecvDataCond);
+      printf("releaseSynch recvdatacond signaled\n");
       pthread_mutex_unlock(&m_RecvDataLock);
-
+      printf("releaseSynch have unlocked\n");
       pthread_mutex_lock(&m_RecvLock);
       pthread_mutex_unlock(&m_RecvLock);
    #else
@@ -1779,10 +1829,16 @@ void CUDT::sendCtrl(int pkttype, void* lparam, void* rparam, int size)
 
          // signal a waiting "recv" call if there is any data available
          #ifndef WIN32
+            printf("sendCtrl want to lock >>>\n");
             pthread_mutex_lock(&m_RecvDataLock);
-            if (m_bSynRecving)
+            printf("sendCtrl have locked <<<\n");
+            if (m_bSynRecving) {
+               printf("sendCtrl signaling on m_RecvDataCond\n");
                pthread_cond_signal(&m_RecvDataCond);
+               printf("sendCtrl signaled on m_RecvDataCond\n");
+            }
             pthread_mutex_unlock(&m_RecvDataLock);
+            printf("sendCtrl unlocked RecvData mutex\n");
          #else
             if (m_bSynRecving)
                SetEvent(m_RecvDataCond);

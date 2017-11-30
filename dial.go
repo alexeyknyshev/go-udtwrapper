@@ -14,6 +14,8 @@ var errMissingAddress = errors.New("missing address")
 // DialUDT connects to the remote address raddr on the network net,
 // which must be "udt", "udt4", or "udt6".
 func (d *Dialer) DialUDT(network string, raddr *UDTAddr) (*UDTConn, error) {
+	logf("DialUDT")
+	defer logf("out of DialUDT")
 	var rendezvous bool
 	switch network {
 	case "udt", "udt4", "udt6":
