@@ -18,7 +18,8 @@ import (
 // #cgo amd64 CFLAGS: -DAMD64
 // #cgo CFLAGS: -Wall -finline-functions -O3 -fno-strict-aliasing -fvisibility=hidden
 // #cgo LDFLAGS: -static-libstdc++ -lm
-// #include "udt_c.h"
+// #include "udt_c_connector.h"
+// #include "udt_c_errors.h"
 // #include <errno.h>
 // #include <string.h>
 import "C"
