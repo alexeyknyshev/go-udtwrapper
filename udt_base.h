@@ -13,6 +13,8 @@
    #include <windows.h>
 #endif
 
+///////////////////////////////////////////////////////////////////////////
+
 #ifdef WIN32
    #ifndef __MINGW__
       // Explicitly define 32-bit and 64-bit numbers
@@ -51,9 +53,6 @@
    typedef int SYSSOCKET;
 #endif
 
-typedef SYSSOCKET UDPSOCKET;
-typedef int UDTSOCKET;
-
 ////////////////////////////////////////////////////////////////////////////////
 
 enum EPOLLOpt
@@ -75,7 +74,7 @@ enum UDTOpt
    UDT_SNDSYN,          // if sending is blocking
    UDT_RCVSYN,          // if receiving is blocking
    UDT_CC,              // custom congestion control algorithm
-   UDT_FC,    // Flight flag size (window size)
+   UDT_FC,              // Flight flag size (window size)
    UDT_SNDBUF,          // maximum buffer in sending queue
    UDT_RCVBUF,          // UDT receiving buffer size
    UDT_LINGER,          // waiting for unsent data when closing
@@ -86,12 +85,12 @@ enum UDTOpt
    UDT_RENDEZVOUS,      // rendezvous connection mode
    UDT_SNDTIMEO,        // send() timeout
    UDT_RCVTIMEO,        // recv() timeout
-   UDT_REUSEADDR, // reuse an existing port or create a new one
-   UDT_MAXBW,   // maximum bandwidth (bytes per second) that the connection can use
-   UDT_STATE,   // current socket state, see UDTSTATUS, read only
-   UDT_EVENT,   // current avalable events associated with the socket
-   UDT_SNDDATA,   // size of data in the sending buffer
-   UDT_RCVDATA    // size of data available for recv
+   UDT_REUSEADDR,       // reuse an existing port or create a new one
+   UDT_MAXBW,           // maximum bandwidth (bytes per second) that the connection can use
+   UDT_STATE,           // current socket state, see UDTSTATUS, read only
+   UDT_EVENT,           // current avalable events associated with the socket
+   UDT_SNDDATA,         // size of data in the sending buffer
+   UDT_RCVDATA          // size of data available for recv
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -109,7 +108,7 @@ struct CPerfMon
    int pktRecvACKTotal;                 // total number of received ACK packets
    int pktSentNAKTotal;                 // total number of sent NAK packets
    int pktRecvNAKTotal;                 // total number of received NAK packets
-   int64_t usSndDurationTotal;    // total time duration when UDT is sending data (idle time exclusive)
+   int64_t usSndDurationTotal;          // total time duration when UDT is sending data (idle time exclusive)
 
    // local measurements
    int64_t pktSent;                     // number of sent data packets, including retransmissions
@@ -123,7 +122,7 @@ struct CPerfMon
    int pktRecvNAK;                      // number of received NAK packets
    double mbpsSendRate;                 // sending rate in Mb/s
    double mbpsRecvRate;                 // receiving rate in Mb/s
-   int64_t usSndDuration;   // busy sending time (i.e., idle time exclusive)
+   int64_t usSndDuration;               // busy sending time (i.e., idle time exclusive)
 
    // instant measurements
    double usPktSndPeriod;               // packet sending period, in microseconds
@@ -138,9 +137,7 @@ struct CPerfMon
 
 typedef enum UDTOpt SOCKOPT;
 typedef struct CPerfMon TRACEINFO;
-
-UDT_API extern const UDTSOCKET INVALID_SOCK;
-#undef ERROR
-UDT_API extern const int ERROR;
+typedef SYSSOCKET UDPSOCKET;
+typedef int UDTSOCKET;
 
 #endif
