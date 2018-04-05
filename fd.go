@@ -13,12 +13,13 @@ import (
 // #cgo darwin CFLAGS: -DOSX
 // #cgo freebsd CFLAGS: -DBSD
 // #cgo windows CXXFLAGS: -DWIN32 -DUDT_EXPORTS
-// #cgo windows LDFLAGS: -static-libgcc -static-libstdc++ -static -lkernel32 -luser32 -lws2_32
+// #cgo windows LDFLAGS: -static-libgcc -static -lkernel32 -luser32 -lws2_32
 // #cgo i386 CFLAGS: -DIA32
 // #cgo amd64 CFLAGS: -DAMD64
 // #cgo CFLAGS: -Wall -finline-functions -O3 -fno-strict-aliasing -fvisibility=hidden
-// #cgo LDFLAGS: -lstdc++ -lm
-// #include "udt_c.h"
+// #cgo LDFLAGS: -static-libstdc++ -lm
+// #include "udt_c_connector.h"
+// #include "udt_c_errors.h"
 // #include <errno.h>
 // #include <string.h>
 import "C"

@@ -1,14 +1,20 @@
-// udt_c.h declares symbols for UDT as they are used from a C program
-
+#ifndef __UDT_C_CONNECTOR_H__
+#define __UDT_C_CONNECTOR_H__
 #include "udt_base.h"
-#include "udt_errors.h"
 #ifdef WIN32
-    #include <stdint.h>
+#include <stdint.h>
 #endif
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 // For some reason the name htons isn't addressable in Go, so we have a function
 // that wraps htons and is called _htons, which makes Go happy.
 uint16_t _htons(uint16_t hostshort);
+
+extern const int ERROR;
+extern const UDTSOCKET INVALID_SOCK;
+
 
 int udt_startup();
 int udt_cleanup();
@@ -29,16 +35,19 @@ int udt_sendmsg(UDTSOCKET u, const char* buf, int len, int ttl, int inorder);
 int udt_recvmsg(UDTSOCKET u, char* buf, int len);
 int64_t udt_sendfile2(UDTSOCKET u, const char* path, int64_t* offset, int64_t size, int block);
 int64_t udt_recvfile2(UDTSOCKET u, const char* path, int64_t* offset, int64_t size, int block);
-
 int udt_epoll_create();
 int udt_epoll_add_usock(int eid, UDTSOCKET u, const int* events);
 int udt_epoll_add_ssock(int eid, SYSSOCKET s, const int* events);
 int udt_epoll_remove_usock(int eid, UDTSOCKET u);
 int udt_epoll_remove_ssock(int eid, SYSSOCKET s);
 int udt_epoll_wait2(int eid, UDTSOCKET* readfds, int* rnum, UDTSOCKET* writefds, int* wnum, int64_t msTimeOut,
-                        SYSSOCKET* lrfds, int* lrnum, SYSSOCKET* lwfds, int* lwnum);
+   SYSSOCKET* lrfds, int* lrnum, SYSSOCKET* lwfds, int* lwnum);
 int udt_epoll_release(int eid);
 int udt_getlasterror_code();
 const char* udt_getlasterror_desc();
 int udt_perfmon(UDTSOCKET u, TRACEINFO* perf, int clear);
 enum UDTSTATUS udt_getsockstate(UDTSOCKET u);
+#ifdef __cplusplus
+}
+#endif
+#endif

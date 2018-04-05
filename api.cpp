@@ -2158,102 +2158,102 @@ UDTSTATUS CUDT::getsockstate(UDTSOCKET u)
 namespace UDT
 {
 
-int udt_startup()
+int startup()
 {
    return CUDT::startup();
 }
 
-int udt_cleanup()
+int cleanup()
 {
    return CUDT::cleanup();
 }
 
-UDTSOCKET udt_socket(int af, int type, int protocol)
+UDTSOCKET socket(int af, int type, int protocol)
 {
    return CUDT::socket(af, type, protocol);
 }
 
-int udt_bind(UDTSOCKET u, const struct sockaddr* name, int namelen)
+int bind(UDTSOCKET u, const struct sockaddr* name, int namelen)
 {
    return CUDT::bind(u, name, namelen);
 }
 
-int udt_bind2(UDTSOCKET u, UDPSOCKET udpsock)
+int bind2(UDTSOCKET u, UDPSOCKET udpsock)
 {
    return CUDT::bind(u, udpsock);
 }
 
-int udt_listen(UDTSOCKET u, int backlog)
+int listen(UDTSOCKET u, int backlog)
 {
    return CUDT::listen(u, backlog);
 }
 
-UDTSOCKET udt_accept(UDTSOCKET u, struct sockaddr* addr, int* addrlen)
+UDTSOCKET accept(UDTSOCKET u, struct sockaddr* addr, int* addrlen)
 {
    return CUDT::accept(u, addr, addrlen);
 }
 
-int udt_connect(UDTSOCKET u, const struct sockaddr* name, int namelen)
+int connect(UDTSOCKET u, const struct sockaddr* name, int namelen)
 {
    return CUDT::connect(u, name, namelen);
 }
 
-int udt_close(UDTSOCKET u)
+int close(UDTSOCKET u)
 {
    return CUDT::close(u);
 }
 
-int udt_getpeername(UDTSOCKET u, struct sockaddr* name, int* namelen)
+int getpeername(UDTSOCKET u, struct sockaddr* name, int* namelen)
 {
    return CUDT::getpeername(u, name, namelen);
 }
 
-int udt_getsockname(UDTSOCKET u, struct sockaddr* name, int* namelen)
+int getsockname(UDTSOCKET u, struct sockaddr* name, int* namelen)
 {
    return CUDT::getsockname(u, name, namelen);
 }
 
-int udt_getsockopt(UDTSOCKET u, int level, SOCKOPT optname, void* optval, int* optlen)
+int getsockopt(UDTSOCKET u, int level, SOCKOPT optname, void* optval, int* optlen)
 {
    return CUDT::getsockopt(u, level, optname, optval, optlen);
 }
 
-int udt_setsockopt(UDTSOCKET u, int level, SOCKOPT optname, const void* optval, int optlen)
+int setsockopt(UDTSOCKET u, int level, SOCKOPT optname, const void* optval, int optlen)
 {
    return CUDT::setsockopt(u, level, optname, optval, optlen);
 }
 
-int udt_send(UDTSOCKET u, const char* buf, int len, int flags)
+int send(UDTSOCKET u, const char* buf, int len, int flags)
 {
    return CUDT::send(u, buf, len, flags);
 }
 
-int udt_recv(UDTSOCKET u, char* buf, int len, int flags)
+int recv(UDTSOCKET u, char* buf, int len, int flags)
 {
    return CUDT::recv(u, buf, len, flags);
 }
 
-int udt_sendmsg(UDTSOCKET u, const char* buf, int len, int ttl, bool inorder)
+int sendmsg(UDTSOCKET u, const char* buf, int len, int ttl, bool inorder)
 {
    return CUDT::sendmsg(u, buf, len, ttl, inorder);
 }
 
-int udt_recvmsg(UDTSOCKET u, char* buf, int len)
+int recvmsg(UDTSOCKET u, char* buf, int len)
 {
    return CUDT::recvmsg(u, buf, len);
 }
 
-int64_t udt_sendfile(UDTSOCKET u, fstream& ifs, int64_t& offset, int64_t size, int block)
+int64_t sendfile(UDTSOCKET u, fstream& ifs, int64_t& offset, int64_t size, int block)
 {
    return CUDT::sendfile(u, ifs, offset, size, block);
 }
 
-int64_t udt_recvfile(UDTSOCKET u, fstream& ofs, int64_t& offset, int64_t size, int block)
+int64_t recvfile(UDTSOCKET u, fstream& ofs, int64_t& offset, int64_t size, int block)
 {
    return CUDT::recvfile(u, ofs, offset, size, block);
 }
 
-int64_t udt_sendfile2(UDTSOCKET u, const char* path, int64_t* offset, int64_t size, int block)
+int64_t sendfile2(UDTSOCKET u, const char* path, int64_t* offset, int64_t size, int block)
 {
    fstream ifs(path, ios::binary | ios::in);
    int64_t ret = CUDT::sendfile(u, ifs, *offset, size, block);
@@ -2261,7 +2261,7 @@ int64_t udt_sendfile2(UDTSOCKET u, const char* path, int64_t* offset, int64_t si
    return ret;
 }
 
-int64_t udt_recvfile2(UDTSOCKET u, const char* path, int64_t* offset, int64_t size, int block)
+int64_t recvfile2(UDTSOCKET u, const char* path, int64_t* offset, int64_t size, int block)
 {
    fstream ofs(path, ios::binary | ios::out);
    int64_t ret = CUDT::recvfile(u, ofs, *offset, size, block);
@@ -2269,42 +2269,42 @@ int64_t udt_recvfile2(UDTSOCKET u, const char* path, int64_t* offset, int64_t si
    return ret;
 }
 
-int udt_select(int nfds, UDSET* readfds, UDSET* writefds, UDSET* exceptfds, const struct timeval* timeout)
+int select(int nfds, UDSET* readfds, UDSET* writefds, UDSET* exceptfds, const struct timeval* timeout)
 {
    return CUDT::select(nfds, readfds, writefds, exceptfds, timeout);
 }
 
-int udt_selectEx(const vector<UDTSOCKET>& fds, vector<UDTSOCKET>* readfds, vector<UDTSOCKET>* writefds, vector<UDTSOCKET>* exceptfds, int64_t msTimeOut)
+int selectEx(const vector<UDTSOCKET>& fds, vector<UDTSOCKET>* readfds, vector<UDTSOCKET>* writefds, vector<UDTSOCKET>* exceptfds, int64_t msTimeOut)
 {
    return CUDT::selectEx(fds, readfds, writefds, exceptfds, msTimeOut);
 }
 
-int udt_epoll_create()
+int epoll_create()
 {
    return CUDT::epoll_create();
 }
 
-int udt_epoll_add_usock(int eid, UDTSOCKET u, const int* events)
+int epoll_add_usock(int eid, UDTSOCKET u, const int* events)
 {
    return CUDT::epoll_add_usock(eid, u, events);
 }
 
-int udt_epoll_add_ssock(int eid, SYSSOCKET s, const int* events)
+int epoll_add_ssock(int eid, SYSSOCKET s, const int* events)
 {
    return CUDT::epoll_add_ssock(eid, s, events);
 }
 
-int udt_epoll_remove_usock(int eid, UDTSOCKET u)
+int epoll_remove_usock(int eid, UDTSOCKET u)
 {
    return CUDT::epoll_remove_usock(eid, u);
 }
 
-int udt_epoll_remove_ssock(int eid, SYSSOCKET s)
+int epoll_remove_ssock(int eid, SYSSOCKET s)
 {
    return CUDT::epoll_remove_ssock(eid, s);
 }
 
-int udt_epoll_wait(int eid, set<UDTSOCKET>* readfds, set<UDTSOCKET>* writefds, int64_t msTimeOut, set<SYSSOCKET>* lrfds, set<SYSSOCKET>* lwfds)
+int epoll_wait(int eid, set<UDTSOCKET>* readfds, set<UDTSOCKET>* writefds, int64_t msTimeOut, set<SYSSOCKET>* lrfds, set<SYSSOCKET>* lwfds)
 {
    return CUDT::epoll_wait(eid, readfds, writefds, msTimeOut, lrfds, lwfds);
 }
@@ -2322,7 +2322,7 @@ int udt_epoll_wait(int eid, set<UDTSOCKET>* readfds, set<UDTSOCKET>* writefds, i
          fds[count ++] = *it; \
       } \
    }
-int udt_epoll_wait2(int eid, UDTSOCKET* readfds, int* rnum, UDTSOCKET* writefds, int* wnum, int64_t msTimeOut,
+int epoll_wait2(int eid, UDTSOCKET* readfds, int* rnum, UDTSOCKET* writefds, int* wnum, int64_t msTimeOut,
                 SYSSOCKET* lrfds, int* lrnum, SYSSOCKET* lwfds, int* lwnum)
 {
    // This API is an alternative format for epoll_wait, created for compatability with other languages.
@@ -2359,32 +2359,32 @@ int udt_epoll_wait2(int eid, UDTSOCKET* readfds, int* rnum, UDTSOCKET* writefds,
    return ret;
 }
 
-int udt_epoll_release(int eid)
+int epoll_release(int eid)
 {
    return CUDT::epoll_release(eid);
 }
 
-ERRORINFO& udt_getlasterror()
+ERRORINFO& getlasterror()
 {
    return CUDT::getlasterror();
 }
 
-int udt_getlasterror_code()
+int getlasterror_code()
 {
    return CUDT::getlasterror().getErrorCode();
 }
 
-const char* udt_getlasterror_desc()
+const char* getlasterror_desc()
 {
    return CUDT::getlasterror().getErrorMessage();
 }
 
-int udt_perfmon(UDTSOCKET u, TRACEINFO* perf, bool clear)
+int perfmon(UDTSOCKET u, TRACEINFO* perf, bool clear)
 {
    return CUDT::perfmon(u, perf, clear);
 }
 
-UDTSTATUS udt_getsockstate(UDTSOCKET u)
+UDTSTATUS getsockstate(UDTSOCKET u)
 {
    return CUDT::getsockstate(u);
 }
