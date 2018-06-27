@@ -13,7 +13,7 @@ import (
 // #cgo i386 CFLAGS: -DIA32
 // #cgo amd64 CFLAGS: -DAMD64
 // #cgo CFLAGS: -Wall -finline-functions -O3 -fno-strict-aliasing -fvisibility=hidden
-// #cgo LDFLAGS: -static-libstdc++ -lm
+// #cgo LDFLAGS: -lm
 // #include "udt_c_connector.h"
 // #include "udt_c_errors.h"
 // #include <errno.h>
